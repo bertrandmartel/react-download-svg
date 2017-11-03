@@ -40,6 +40,23 @@ const Trigger = React.createClass({
   }
 });
 
+//https://stackoverflow.com/a/28226736/2614364 by Ciro Costa
+function triggerDownload(imgURI, filename) {
+  console.log(filename);
+  var evt = new MouseEvent('click', {
+    view: window,
+    bubbles: false,
+    cancelable: true
+  });
+
+  var a = document.createElement('a');
+  a.setAttribute('download', filename);
+  a.setAttribute('href', imgURI);
+  a.setAttribute('target', '_blank');
+
+  a.dispatchEvent(evt);
+}
+
 const Wrapper = React.createClass({
   displayName: 'DownloadSvgWrapper',
   propTypes: {
@@ -94,32 +111,27 @@ const Wrapper = React.createClass({
 
     var canvas = document.createElement('canvas');
 
-    // Image will be scaled to the requested size.
-    // var size = data.requestedSize;
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
-
     var ctx = canvas.getContext('2d');
+    var DOMURL = window.URL || window.webkitURL || window;
 
-    var img = document.createElement('img');
+    var img = new Image();
+    var svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    var url = DOMURL.createObjectURL(svgBlob);
 
-    // New window for the image when it's loaded
-    if(!this.isChrome) window.open('', 'download');
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0);
+      DOMURL.revokeObjectURL(url);
 
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0, width, height);
-      // `download` attr is not well supported
-      // Will result in a download popup for chrome and the
-      // image opening in a new tab for others.
+      var imgURI = canvas
+          .toDataURL('image/png')
+          .replace('image/png', 'image/octet-stream');
 
-      var a = document.createElement('a');
-      a.setAttribute('href', canvas.toDataURL('image/png'))
-      a.setAttribute('target', 'download')
-      a.setAttribute('download', filename);
-      a.click();
+      triggerDownload(imgURI, filename);
     };
 
-    img.setAttribute('src', 'data:image/svg+xml;base64,' + btoa(svgData));
+    img.src = url;
   },
 
   /**
