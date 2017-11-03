@@ -40,6 +40,17 @@ const Trigger = React.createClass({
   }
 });
 
+//https://stackoverflow.com/a/11277737/2614364
+function createObjectURL ( file ) {
+    if ( window.webkitURL ) {
+        return window.webkitURL.createObjectURL( file );
+    } else if ( window.URL && window.URL.createObjectURL ) {
+        return window.URL.createObjectURL( file );
+    } else {
+        return null;
+    }
+}
+
 const Wrapper = React.createClass({
   displayName: 'DownloadSvgWrapper',
   propTypes: {
@@ -103,10 +114,11 @@ const Wrapper = React.createClass({
 
     var ctx = canvas.getContext('2d');
 
-    var img = document.createElement('img');
-
     // New window for the image when it's loaded
     if(!this.isChrome) window.open('', 'download');
+
+    var img = document.createElement('img');
+    var svg = new Blob([svgData], {type:"image/svg+xml;base64," + btoa(svgData)});
 
     img.onload = () => {
       ctx.drawImage(img, 0, 0, width, height);
@@ -121,7 +133,7 @@ const Wrapper = React.createClass({
       a.click();
     };
 
-    img.setAttribute('src', 'data:image/svg+xml;base64,' + btoa(svgData));
+    img.src = createObjectURL(svg);
   },
 
   /**
