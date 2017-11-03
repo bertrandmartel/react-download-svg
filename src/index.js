@@ -72,12 +72,14 @@ const Wrapper = React.createClass({
     if(!this.state.creatingDownloadable) return;
 
     // Finish creating downloadable data
-    const { width, height } = this.state.downloadableOptions;
     var filename = this.state.downloadableOptions.filename;
     if(!filename) filename = this.props.filename;
     const $svg = ReactDOM.findDOMNode(this.wrapperNode).getElementsByTagName('svg')[0];
     //
     const $clone = $svg.cloneNode(true);
+
+    const width = this.state.downloadableOptions.width || $svg.width.baseVal.value;
+    const height = this.state.downloadableOptions.height || $svg.height.baseVal.value;
 
     $clone.setAttribute('width', width);
     $clone.setAttribute('height', height);
