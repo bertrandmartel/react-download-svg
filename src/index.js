@@ -103,7 +103,7 @@ class Wrapper extends React.Component {
     var ctx = canvas.getContext('2d');
 
     // New window for the image when it's loaded
-    if(!this.isChrome) window.open('', 'download');
+    //if(!this.isChrome) window.open('', 'download');
 
     var img = document.createElement('img');
     var svg = new Blob([svgData], {type:"image/svg+xml;base64," + btoa(svgData)});
