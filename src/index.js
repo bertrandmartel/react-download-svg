@@ -1,74 +1,62 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
+import PropTypes from 'prop-types';
 import EventEmitter from 'wolfy87-eventemitter';
 const ee = new EventEmitter();
 
-const Trigger = React.createClass({
-  displayName: 'DownloadSvgTrigger',
-  propTypes: {
-    component: React.PropTypes.any,
-    filename: React.PropTypes.string,
-    eventName: React.PropTypes.string,
-    width: React.PropTypes.number,
-    height: React.PropTypes.number
-  },
+class Trigger extends React.Component {
 
-  getDefaultProps: function () {
-    return {
-      filename: null,
-      width: 400,
-      height: 400,
-      eventName: 'downloadSvg',
-      component: 'button'
-    };
-  },
-
-  handleExport: function () {
+  handleExport() {
     // Request a PNG with a specific size.
     ee.emit(this.props.eventName, {
       width: this.props.width,
       height: this.props.height,
       filename: this.props.filename
     });
-  },
+  }
 
-  render: function () {
+  render() {
     return React.createElement(this.props.component, {
       className: this.props.className,
       onClick: this.handleExport
     }, this.props.children);
   }
-});
+}
 
-const Wrapper = React.createClass({
-  displayName: 'DownloadSvgWrapper',
-  propTypes: {
-    filename: React.PropTypes.string,
-    listenFor: React.PropTypes.string
-  },
+Trigger.propTypes = {
+  component: PropTypes.any,
+  filename: PropTypes.string,
+  eventName: PropTypes.string,
+  width: PropTypes.number,
+  height: PropTypes.number
+};
 
-  getInitialState: function () {
-    return {
+Trigger.defaultProps = {
+  filename: null,
+  width: 400,
+  height: 400,
+  eventName: 'downloadSvg',
+  component: 'button'
+};
+
+class Wrapper extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
       width: this.props.initialWidth || '100%',
       height: this.props.initialHeight || '100%',
       downloadableOptions: null,
       creatingDownloadable: false
     };
-  },
+  }
 
-  getDefaultProps: function () {
-    return {
-      filename: 'untitled.png',
-      listenFor: 'downloadSvg'
-    }
-  },
-
-  componentDidMount: function () {
+  componentDidMount() {
     ee.addListener(this.props.listenFor, this.startDownload);
     this.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-  },
+  }
 
-  componentDidUpdate: function (prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     if(!this.state.creatingDownloadable) return;
 
     // Finish creating downloadable data
@@ -120,7 +108,7 @@ const Wrapper = React.createClass({
     };
 
     img.setAttribute('src', 'data:image/svg+xml;base64,' + btoa(svgData));
-  },
+  }
 
   /**
    * Expects object with:
@@ -128,16 +116,16 @@ const Wrapper = React.createClass({
    * height: Number
    * filename: String (optional)
    */
-  startDownload: function (data) {
+  startDownload(data) {
     this.setState({
       width: data.width,
       height: data.height,
       downloadableOptions: data,
       creatingDownloadable: true
     });
-  },
+  }
 
-  render: function () {
+  render() {
     const { width, height } = this.state;
 
     const childrenWithProps = React.Children.map(this.props.children, (child) => {
@@ -153,7 +141,17 @@ const Wrapper = React.createClass({
       </div>
     );
   }
-});
+}
+
+Wrapper.propTypes = {
+  filename: PropTypes.string,
+  listenFor: PropTypes.string
+};
+
+Wrapper.defaultProps = {
+  filename: 'untitled.png',
+  listenFor: 'downloadSvg'
+};
 
 export {
 	Wrapper,
