@@ -23,14 +23,6 @@ class Trigger extends React.Component {
   }
 }
 
-Trigger.propTypes = {
-  component: PropTypes.any,
-  filename: PropTypes.string,
-  eventName: PropTypes.string,
-  width: PropTypes.number,
-  height: PropTypes.number
-};
-
 Trigger.defaultProps = {
   filename: null,
   width: 400,
@@ -39,15 +31,21 @@ Trigger.defaultProps = {
   component: 'button'
 };
 
-//https://stackoverflow.com/a/11277737/2614364
-function createObjectURL ( file ) {
-    if ( window.webkitURL ) {
-        return window.webkitURL.createObjectURL( file );
-    } else if ( window.URL && window.URL.createObjectURL ) {
-        return window.URL.createObjectURL( file );
-    } else {
-        return null;
-    }
+//https://stackoverflow.com/a/28226736/2614364 by Ciro Costa
+function triggerDownload(imgURI, filename) {
+  console.log(filename);
+  var evt = new MouseEvent('click', {
+    view: window,
+    bubbles: false,
+    cancelable: true
+  });
+
+  var a = document.createElement('a');
+  a.setAttribute('download', filename);
+  a.setAttribute('href', imgURI);
+  a.setAttribute('target', '_blank');
+
+  a.dispatchEvent(evt);
 }
 
 class Wrapper extends React.Component {
@@ -95,33 +93,25 @@ class Wrapper extends React.Component {
 
     var canvas = document.createElement('canvas');
 
-    // Image will be scaled to the requested size.
-    // var size = data.requestedSize;
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
-
     var ctx = canvas.getContext('2d');
+    var DOMURL = window.URL || window.webkitURL || window;
+    var img = new Image();
+    var svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    var url = DOMURL.createObjectURL(svgBlob);
 
-    // New window for the image when it's loaded
-    //if(!this.isChrome) window.open('', 'download');
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0);
+      DOMURL.revokeObjectURL(url);
 
-    var img = document.createElement('img');
-    var svg = new Blob([svgData], {type:"image/svg+xml;base64," + btoa(svgData)});
+      var imgURI = canvas
+          .toDataURL('image/png')
+          .replace('image/png', 'image/octet-stream');
 
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0, width, height);
-      // `download` attr is not well supported
-      // Will result in a download popup for chrome and the
-      // image opening in a new tab for others.
-
-      var a = document.createElement('a');
-      a.setAttribute('href', canvas.toDataURL('image/png'))
-      a.setAttribute('target', 'download')
-      a.setAttribute('download', filename);
-      a.click();
+      triggerDownload(imgURI, filename);
     };
-
-    img.src = createObjectURL(svg);
+    img.src = url;
   }
 
   /**
