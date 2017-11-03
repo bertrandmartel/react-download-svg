@@ -150,7 +150,7 @@ class Wrapper extends React.Component {
     });
 
     return (
-      <div ref={(node) => this.wrapperNode = node}>
+      <div className={this.props.className} ref={(node) => this.wrapperNode = node}>
         {childrenWithProps}
       </div>
     );
@@ -159,12 +159,14 @@ class Wrapper extends React.Component {
 
 Wrapper.propTypes = {
   filename: PropTypes.string,
-  listenFor: PropTypes.string
+  listenFor: PropTypes.string,
+  className: PropTypes.string
 };
 
 Wrapper.defaultProps = {
   filename: 'untitled.png',
-  listenFor: 'downloadSvg'
+  listenFor: 'downloadSvg',
+  className: ''
 };
 
 export {
